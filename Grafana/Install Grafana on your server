@@ -1,0 +1,85 @@
+#Install Grafana on Your Server
+
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+
+#Install Grafana
+
+sudo apt-get update
+sudo apt-get install grafana
+
+#Start Grafana
+
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+
+#Connect Grafana to Prometheus
+
+Once Grafana is installed, you need to add Prometheus as a data source.
+
+a. Access Grafana:
+Go to http://<server-ip>:3000 and log in.
+
+b. Add Prometheus as a data source:
+
+1-Click the gear icon (Configuration) in the left-hand menu.
+2-Select Data Sources.
+3-Click Add data source.
+4-Choose Prometheus from the list of data sources.
+5-Configure the URL to point to your Prometheus server (e.g., http://<prometheus-ip>:9090).
+6-Click Save & Test to verify the connection.
+
+#Create Dashboards for Metrics
+You can create multiple dashboards for system metrics and application-specific metrics using PromQL queries.
+
+a. System Metrics Dashboard (CPU, memory, disk, network):
+You can use the Node Exporter metrics to create system-level monitoring panels.
+
+1-In Grafana, click the + icon (Create) and select Dashboard.
+2-Add a New Panel.
+3-In the Query field, use PromQL queries. Some useful queries are:
+
+CPU Usage:
+100 - (avg by (instance) (irate(node_cpu_seconds_total{job="node_exporter",mode="idle"}[5m])) * 100)
+
+
+Memory Usage:
+node_memory_MemTotal_bytes{job="node_exporter"} - node_memory_MemAvailable_bytes{job="node_exporter"}
+
+Disk Space Usage:
+node_filesystem_avail_bytes{job="node_exporter",fstype!="tmpfs"} / node_filesystem_size_bytes{job="node_exporter",fstype!="tmpfs"} * 100
+
+#Application-Specific Dashboard:
+For custom application metrics or services like MySQL, you can use the relevant Prometheus metrics and create panels.
+
+MySQL Connections: mysql_global_status_threads_connected
+
+Nginx Requests: rate(nginx_http_requests_total[1m])
+
+
+#Custom panels using PromQL queries
+
+To create more custom panels, use PromQL (Prometheus Query Language) in Grafana’s query editor. You can visualize your metrics in different formats, such as graphs, gauges, tables, and heatmaps.
+
+1-Click on the + icon and select Dashboard.
+2-Add new panels and use PromQL to fetch the metrics you need.
+3-For advanced queries, consider aggregations or calculations over time windows.
+
+#Set Up User Authentication and Authorization
+
+Open the Grafana configuration file:
+sudo nano /etc/grafana/grafana.ini
+
+In the [security] section, you can adjust password policies and disable signup:
+
+[security]
+# Default admin user, created on startup
+admin_user = admin
+admin_password = your_password_here
+
+# Disable user signup
+disable_signout_menu = true
+
+Restart Grafana to apply changes:
+sudo systemctl restart grafana-server

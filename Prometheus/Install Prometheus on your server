@@ -1,0 +1,67 @@
+# Download Prometheus package
+wget https://github.com/prometheus/prometheus/releases/download/v2.46.0/prometheus-2.46.0.linux-amd64.tar.gz
+
+# Extract the tarball
+tar -xvf prometheus-2.46.0.linux-amd64.tar.gz
+
+# Move Prometheus binary to `/usr/local/bin` and configure directory
+sudo mv prometheus-2.46.0.linux-amd64/prometheus /usr/local/bin/
+sudo mv prometheus-2.46.0.linux-amd64/promtool /usr/local/bin/
+sudo mv prometheus-2.46.0.linux-amd64/consoles /etc/prometheus/
+sudo mv prometheus-2.46.0.linux-amd64/console_libraries /etc/prometheus/
+
+# Create Prometheus data directory
+sudo mkdir -p /var/lib/prometheus
+
+# Create a Prometheus user
+sudo useradd --no-create-home --shell /bin/false prometheus
+
+# Change ownership of directories
+sudo chown -R prometheus:prometheus /etc/prometheus
+sudo chown -R prometheus:prometheus /var/lib/prometheus
+
+# Create systemd service for Prometheus
+sudo nano /etc/systemd/system/prometheus.service
+
+#Add the following content to the prometheus.service file:
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+ExecStart=/usr/local/bin/prometheus \
+    --config.file=/etc/prometheus/prometheus.yml \
+    --storage.tsdb.path=/var/lib/prometheus/ \
+    --web.console.templates=/etc/prometheus/consoles \
+    --web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+
+#Start and enable the service:
+
+sudo systemctl daemon-reload
+sudo systemctl start prometheus
+sudo systemctl enable prometheus
+
+# Configure Prometheus for Scraping
+
+# Add the following content to the prometheus.yml file '/etc/prometheus/prometheus.yml':
+global:
+  scrape_interval: 15s  # Default scrape interval
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']  # Prometheus itself
+
+  - job_name: 'node_exporter'  # For system metrics
+    static_configs:
+      - targets: ['localhost:9100']  # Node exporter running locally
+
+retention_duration: 15d  # Retain metrics data for 15 days
+
+# Restart the service
+sudo systemctl restart prometheus

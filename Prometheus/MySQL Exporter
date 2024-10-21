@@ -1,0 +1,16 @@
+#Install the MySQL Exporter
+
+wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.14.0/mysqld_exporter-0.14.0.linux-amd64.tar.gz
+tar xvfz mysqld_exporter-0.14.0.linux-amd64.tar.gz
+sudo mv mysqld_exporter-0.14.0.linux-amd64/mysqld_exporter /usr/local/bin/
+
+#Start the MySQL Exporter and configure Prometheus to scrape it
+
+sudo /usr/local/bin/mysqld_exporter --config.my-cnf /path/to/.my.cnf
+
+# Add the following content to the prometheus.yml file '/etc/prometheus/prometheus.yml':
+
+scrape_configs:
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['localhost:9104']  # MySQL exporter

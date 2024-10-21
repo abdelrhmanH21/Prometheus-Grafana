@@ -1,0 +1,16 @@
+#Install the Nginx Prometheus Exporter
+
+wget https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v0.10.0/nginx-prometheus-exporter_0.10.0_linux_amd64.tar.gz
+tar xvfz nginx-prometheus-exporter_0.10.0_linux_amd64.tar.gz
+sudo mv nginx-prometheus-exporter /usr/local/bin/
+
+#Start the Nginx Exporter and configure Prometheus to scrape it
+
+sudo /usr/local/bin/nginx-prometheus-exporter -nginx.scrape-uri http://localhost:8080/stub_status
+
+# Add the following content to the prometheus.yml file '/etc/prometheus/prometheus.yml':
+
+scrape_configs:
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['localhost:9113']  # Nginx exporter
