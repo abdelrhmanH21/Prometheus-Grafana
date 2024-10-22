@@ -3,6 +3,7 @@
 #### This project provides a setup for monitoring system and application metrics using Prometheus and Grafana. It includes instructions to install and configure Prometheus, connect Grafana as a data source, and create dashboards for visualizing the collected metrics.
 
 ### Project Page [here](https://github.com/abdelrhmanH21/Prometheus-Grafana)
+### Project URL [here](https://roadmap.sh/projects/monitoring)
 
 # Prerequisites
 Before running the project, ensure you have the following installed:
